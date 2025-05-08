@@ -38,6 +38,7 @@ app.post('/webhook', (req, res) => {
 
         } else if (intent === 'Default Welcome Intent') {
             res.json({
+                fulfillmentText: greetingData.message,
                 payload: {
                     telegram: {
                         text: greetingData.message,
