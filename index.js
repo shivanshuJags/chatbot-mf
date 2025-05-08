@@ -16,6 +16,10 @@ app.post('/webhook', (req, res) => {
 
         } else if (intent === 'ListFundsByCategory') {
             const category = req.body.queryResult.parameters['category'];
+
+            if (!category) {
+                return res.json({ fulfillmentText: "Please specify a fund category like Equity, Debt, or Hybrid." });
+            }
             const match = fundData.find(c => c.category.toLowerCase() === category.toLowerCase());
 
             if (match) {
