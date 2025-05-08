@@ -38,36 +38,20 @@ app.post('/webhook', (req, res) => {
 
         } else if (intent === 'Default Welcome Intent') {
             res.json({
-                fulfillmentMessages: [
-                    {
-                        text: {
-                            text: [greetingData.message]
-                        }
-                    },
-                    {
-                        platform: "TELEGRAM",
-                        suggestions: {
-                            suggestions: greetingData.suggestions.map(s => ({ title: s }))
-                        }
-                    },
-                    {
-                        payload: {
-                            richContent: [
-                                [
-                                    {
-                                        type: "description",
-                                        title: greetingData.message,
-                                        text: []
-                                    },
-                                    {
-                                        type: "chips",
-                                        options: greetingData.suggestions.map(s => ({ text: s }))
-                                    }
-                                ]
-                            ]
+                payload: {
+                    telegram: {
+                        text: greetingData.message,
+                        reply_markup: {
+                            keyboard: [
+                                ["Portfolio Valuation"],
+                                ["Explore Funds"],
+                                ["Transaction History"]
+                            ],
+                            resize_keyboard: true,
+                            one_time_keyboard: false
                         }
                     }
-                ]
+                }
             });
         } else {
             res.json({ fulfillmentText: "I didn’t understand that." });
