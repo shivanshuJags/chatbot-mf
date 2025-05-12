@@ -4,11 +4,31 @@
     "funds": [
       {
         "fund_id": "MF001",
-        "fund_name": "Alpha Growth Fund"
+        "fund_name": "Alpha Growth Fund",
+        "details": {
+          "allocation": {
+            "Debt": "30%",
+            "Large Cap Equity": "30%",
+            "Mid Cap Equity": "20%",
+            "Small Cap Equity": "20%"
+          },
+          "cagr": "15%",
+          "link": "https://dummy-link.com"
+        }
       },
       {
         "fund_id": "MF004",
-        "fund_name": "Delta Tax Saver Fund"
+        "fund_name": "Delta Tax Saver Fund",
+        "details": {
+          "allocation": {
+            "Debt": "30%",
+            "Large Cap Equity": "50%",
+            "Mid Cap Equity": "22%",
+            "Small Cap Equity": "25%"
+          },
+          "cagr": "30%",
+          "link": "https://dummy-link.com"
+        }
       }
     ]
   },
@@ -17,11 +37,31 @@
     "funds": [
       {
         "fund_id": "MF002",
-        "fund_name": "Beta Income Fund"
+        "fund_name": "Beta Income Fund",
+        "details": {
+          "allocation": {
+            "Debt": "30%",
+            "Large Cap Equity": "30%",
+            "Mid Cap Equity": "20%",
+            "Small Cap Equity": "20%"
+          },
+          "cagr": "15%",
+          "link": "https://dummy-link.com"
+        }
       },
       {
         "fund_id": "MF005",
-        "fund_name": "Omega Liquid Fund"
+        "fund_name": "Omega Liquid Fund",
+        "details": {
+          "allocation": {
+            "Debt": "30%",
+            "Large Cap Equity": "20%",
+            "Mid Cap Equity": "20%",
+            "Small Cap Equity": "10%"
+          },
+          "cagr": "16%",
+          "link": "https://dummy-link.com"
+        }
       }
     ]
   },
@@ -30,7 +70,17 @@
     "funds": [
       {
         "fund_id": "MF003",
-        "fund_name": "Gamma Balanced Fund"
+        "fund_name": "Gamma Balanced Fund",
+        "details": {
+          "allocation": {
+            "Debt": "40%",
+            "Large Cap Equity": "55%",
+            "Mid Cap Equity": "9%",
+            "Small Cap Equity": "17%"
+          },
+          "cagr": "10%",
+          "link": "https://dummy-link.com"
+        }
       }
     ]
   }

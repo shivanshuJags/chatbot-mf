@@ -5,12 +5,14 @@
       {
         "date": "2025-04-01",
         "amount": 5000,
-        "fund_name": "Alpha Growth Fund"
+        "fund_name": "Alpha Growth Fund",
+        "fund_id": "MF001"
       },
       {
         "date": "2025-04-10",
         "amount": 2000,
-        "fund_name": "Beta Income Fund"
+        "fund_name": "Beta Income Fund",
+        "fund_id": "MF002"
       }
     ]
   },
@@ -20,12 +22,14 @@
       {
         "date": "2025-04-15",
         "amount": 3500,
-        "fund_name": "Gamma Balanced Fund"
+        "fund_name": "Gamma Balanced Fund",
+        "fund_id": "MF003"
       },
       {
         "date": "2025-04-20",
         "amount": 1000,
-        "fund_name": "Delta Tax Saver Fund"
+        "fund_name": "Delta Tax Saver Fund",
+        "fund_id": "MF004"
       }
     ]
   }

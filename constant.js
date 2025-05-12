@@ -9,6 +9,11 @@ module.exports = {
     INTENT_NAME: {
         welcome: 'Default Welcome Intent',
         explore_funds: 'Explore Funds',
-        fund_category_selection: 'Fund Category Selection'
+        fund_category_selection: 'Fund Category Selection',
+        fundSelection: 'Fund Detail Selection',
+        capture_contact: "Capture Contact",
+        portfolio_valuation: "Portfolio Valuation",
+        transaction_history: "Transaction History",
+        portfolio_selection: "Select Portfolio"
     }
 }
