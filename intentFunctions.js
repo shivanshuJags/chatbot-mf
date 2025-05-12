@@ -5,7 +5,23 @@ const fundData = require('./fund&category.json');
 const portfolioData = require('./transactionhistory.json');
 
 const intentFunctions = {
-    welcomeIntentFn: function welcome(agent) {
+    welcomeIntentFn: function (agent) {
+        const sessionId = agent.session.split('/').pop();
+
+        // Clear any stored session info
+        if (global.sessionStore?.[sessionId]) {
+            delete global.sessionStore[sessionId];
+        }
+
+        // Clear all active contexts
+        agent.contexts.forEach(ctx => {
+            const contextName = ctx.name.split('/').pop();
+            agent.context.set({
+                name: contextName,
+                lifespan: 0
+            });
+        });
+
         if (agent.requestSource === agent.TELEGRAM) {
             showQuickOptions(agent, greetingData.suggestions, CONSTANTS.MESSAGE.welcome);
         } else {
@@ -79,8 +95,12 @@ const intentFunctions = {
             agent.context.set({
                 name: 'awaiting_phone',
                 lifespan: 2,
-                parameters: { followup: 'Portfolio Valuation' }
+                parameters: { followup: CONSTANTS.INTENT_NAME.portfolio_valuation }
             });
+            global.sessionStore[sessionId] = {
+                ...global.sessionStore[sessionId],
+                followup: CONSTANTS.INTENT_NAME.portfolio_valuation
+            };
             agent.add("📞 Kindly enter your registered contact number to proceed.");
             return;
         }
@@ -113,7 +133,6 @@ const intentFunctions = {
         }
 
         global.sessionStore[sessionId] = { phone };
-
         const followupIntent = agent.context.get('awaiting_phone')?.parameters?.followup;
 
         if (followupIntent === CONSTANTS.INTENT_NAME.portfolio_valuation) {
@@ -125,6 +144,20 @@ const intentFunctions = {
         } else {
             agent.add(`✅ Thanks! Your number ${phone} has been saved.`);
         }
+    },
+    reEnterContactFn: function (agent) {
+        const sessionId = agent.session.split('/').pop();
+        const followup = global.sessionStore?.[sessionId]?.followup;
+
+        agent.context.set({
+            name: 'awaiting_phone',
+            lifespan: 2,
+            parameters: {
+                followup
+            }
+        });
+
+        agent.add("📞 Kindly enter your registered 10-digit mobile number.");
     },
     selectPortfolioIntentFn: function (agent) {
         const selectedPortfolio = agent.query;
@@ -157,7 +190,6 @@ const intentFunctions = {
             month: 'short',
             year: 'numeric'
         });
-        console.log(currentDate, match);
         agent.add(`📈 Your Portfolio *${match.fund_id}* valuation is *${match.amount}* as of *${currentDate}*`);
     },
     fallbackIntentFn: function (agent) {

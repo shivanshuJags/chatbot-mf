@@ -7,7 +7,8 @@ const { welcomeIntentFn, exploreFundsIntentFn,
     captureContactIntentFn,
     portfolioValuationIntentFn,
     transactionHistoryIntentFn,
-    selectPortfolioIntentFn } = require('./intentFunctions');
+    selectPortfolioIntentFn, 
+    reEnterContactFn} = require('./intentFunctions');
 
 const app = express();
 app.use(express.json());
@@ -26,6 +27,7 @@ app.post('/webhook', (req, res) => {
     intentMap.set(CONSTANTS.INTENT_NAME.portfolio_valuation, portfolioValuationIntentFn);
     intentMap.set(CONSTANTS.INTENT_NAME.transaction_history, transactionHistoryIntentFn);
     intentMap.set(CONSTANTS.INTENT_NAME.capture_contact, captureContactIntentFn);
+    intentMap.set(CONSTANTS.INTENT_NAME.re_eneter_contact, reEnterContactFn);
     intentMap.set(null, fallbackIntentFn);
     agent.handleRequest(intentMap);
 });
