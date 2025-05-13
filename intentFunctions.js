@@ -1,9 +1,11 @@
 const chrono = require('chrono-node');
+const path = require('path');
 const CONSTANTS = require('./constant');
 const greetingData = require('./greeting.json');
 const fundData = require('./fund&category.json');
 const portfolioData = require('./transactionhistory.json');
-const { showQuickOptions, showPortfolioOptions, buildTransactionTable, handleTransactionHistory, getCurrentFinancialYear, getPreviousFinancialYear } = require('./common');
+const { showQuickOptions, showPortfolioOptions, buildTransactionTable, handleTransactionHistory, getCurrentFinancialYear, getPreviousFinancialYear, handleExcelDownload } = require('./common');
+const { generateTransactionExcel } = require('./excel_util');
 
 const intentFunctions = {
     welcomeIntentFn: function (agent) {
@@ -293,6 +295,26 @@ const intentFunctions = {
 
         const formattedTable = buildTransactionTable(phone, filtered);
         handleTransactionHistory(formattedTable, agent);
+    },
+    downloadTransactionExcelIntentFn: async function (agent) {
+        const sessionId = agent.session.split('/').pop();
+        const phone = global.sessionStore?.[sessionId]?.phone;
+
+        if (!phone) {
+            agent.add("❗ Please enter your registered number again.");
+            return;
+        }
+
+        const userData = portfolioData.find(u => u.mobile === phone);
+        if (!userData || !userData.transactions.length) {
+            agent.add("📭 No transactions found.");
+            return;
+        }
+
+        const filePath = await generateTransactionExcel(phone, userData.transactions);
+
+        const downloadUrl = `https://n6274q7s-3000.inc1.devtunnels.ms/downloads/${path.basename(filePath)}`;
+        handleExcelDownload(agent, downloadUrl);
     },
     userWantsToInvestMoreIntentFn: function (agent) {
         agent.add(CONSTANTS.MESSAGE.invest_more_msg);

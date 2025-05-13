@@ -1,5 +1,6 @@
 const express = require('express');
-const { WebhookClient, Payload } = require('dialogflow-fulfillment');
+const path = require('path');
+const { WebhookClient } = require('dialogflow-fulfillment');
 const CONSTANTS = require('./constant');
 const { welcomeIntentFn, exploreFundsIntentFn,
     fallbackIntentFn, categorySelectionIntentFn,
@@ -11,9 +12,11 @@ const { welcomeIntentFn, exploreFundsIntentFn,
     reEnterContactFn,
     captureTransactionDateIntentFn,
     userWantsToInvestMoreIntentFn,
-    userWantsToExitIntentFn } = require('./intentFunctions');
+    userWantsToExitIntentFn,
+    downloadTransactionExcelIntentFn } = require('./intentFunctions');
 
 const app = express();
+app.use('/downloads', express.static(path.join(__dirname, 'downloads')));
 app.use(express.json());
 
 global.sessionStore = global.sessionStore || {};
@@ -34,6 +37,8 @@ app.post('/webhook', (req, res) => {
     intentMap.set(CONSTANTS.INTENT_NAME.capture_txn_date, captureTransactionDateIntentFn);
     intentMap.set(CONSTANTS.INTENT_NAME.user_invest_more, userWantsToInvestMoreIntentFn);
     intentMap.set(CONSTANTS.INTENT_NAME.user_exit, userWantsToExitIntentFn);
+    intentMap.set(CONSTANTS.INTENT_NAME.download_txn_intent, downloadTransactionExcelIntentFn);
+
     intentMap.set(null, fallbackIntentFn);
     agent.handleRequest(intentMap);
 });

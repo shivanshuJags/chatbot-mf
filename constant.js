@@ -28,5 +28,6 @@ module.exports = {
         capture_txn_date: 'Capture Transaction Date',
         user_invest_more: 'User Wants to Invest More',
         user_exit: 'User Wants to Exit',
+        download_txn_intent:'Download Transaction Excel'
     }
 }

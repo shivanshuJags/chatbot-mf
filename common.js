@@ -69,6 +69,7 @@ function handleTransactionHistory(formattedTable, agent) {
             inline_keyboard: [
                 [
                     { text: "Invest More", callback_data: "Invest More" },
+                    { text: "Download Excel and Exit", callback_data: "Download Excel and Exit" },
                     { text: "Exit", callback_data: "Exit" }
                 ]
             ]
@@ -78,6 +79,22 @@ function handleTransactionHistory(formattedTable, agent) {
     // Send as one payload
     const payload = new Payload('TELEGRAM', combinedPayload, { sendAsMessage: true });
     agent.add(payload);
+}
+
+function handleExcelDownload(agent, downloadUrl) {
+
+    const telegramPayload = {
+        text: `📥 Click below to download your transaction report (Excel):`,
+        reply_markup: {
+            inline_keyboard: [
+                [
+                    { text: "📄 Download Report", url: downloadUrl }
+                ]
+            ]
+        }
+    };
+
+    agent.add(new Payload(agent.TELEGRAM, telegramPayload, { sendAsMessage: true, rawPayload: true }));
 }
 
 function getCurrentFinancialYear() {
@@ -124,5 +141,6 @@ module.exports = {
     handleTransactionHistory,
     getCurrentFinancialYear,
     getPreviousFinancialYear,
+    handleExcelDownload,
     debugDate
 };
