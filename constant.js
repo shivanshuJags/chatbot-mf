@@ -10,7 +10,10 @@ module.exports = {
         mobile_options: ["Enter Registered Number Again", "Main Menu"],
         no_portfolio_invest_options: ["Invest More", "Enter Registered Number Again", "Main Menu"],
         no_portfolio_found_msg: 'No Portfolio found associted to this number',
-        no_portfolio_found: '🚫 No portfolios found for your number.\nPlease try again with a registered number or go back to the main menu.'
+        no_portfolio_found: '🚫 No portfolios found for your number.\nPlease try again with a registered number or go back to the main menu.',
+        thankyou_msg:'🙏 Thank you for using our services. Have a great day!',
+        fund_category_continue:'📊 Kindly select a fund category to continue:',
+        invest_more_msg:'🔁 Great! Let’s help you invest more.',
     },
     INTENT_NAME: {
         welcome: 'Default Welcome Intent',
@@ -21,6 +24,9 @@ module.exports = {
         re_eneter_contact: 'ReEnter Contact',
         portfolio_valuation: "Portfolio Valuation",
         transaction_history: "Transaction History",
-        portfolio_selection: "Select Portfolio"
+        portfolio_selection: "Select Portfolio",
+        capture_txn_date: 'Capture Transaction Date',
+        user_invest_more: 'User Wants to Invest More',
+        user_exit: 'User Wants to Exit',
     }
 }

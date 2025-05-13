@@ -1,4 +1,4 @@
-const { showQuickOptions, showPortfolioOptions } = require('./common');
+const { showQuickOptions, showPortfolioOptions, buildTransactionTable, handleTransactionHistory } = require('./common');
 const CONSTANTS = require('./constant');
 const greetingData = require('./greeting.json');
 const fundData = require('./fund&category.json');
@@ -138,9 +138,18 @@ const intentFunctions = {
         if (followupIntent === CONSTANTS.INTENT_NAME.portfolio_valuation) {
             showPortfolioOptions(agent, phone);
 
-        } else if (followupIntent === 'Transaction History') {
-            agent.add(`✅ Thanks! Here's your transaction history:`);
-            agent.add(`📄 - ₹10,000 in Equity Fund\n📄 - ₹5,000 redeemed from Hybrid Fund`);
+        } else if (followupIntent === CONSTANTS.INTENT_NAME.transaction_history) {
+            const options = ["Current Financial Year", "Previous Financial Year"];
+            showQuickOptions(agent, options, "📆 Kindly provide a time period to view your transaction history:");
+
+            // Set context so we can capture the date next
+            agent.context.set({
+                name: 'awaiting_transaction_date',
+                lifespan: 2,
+                parameters: {
+                    phone
+                }
+            });
         } else {
             agent.add(`✅ Thanks! Your number ${phone} has been saved.`);
         }
@@ -191,6 +200,91 @@ const intentFunctions = {
             year: 'numeric'
         });
         agent.add(`📈 Your Portfolio *${match.fund_id}* valuation is *${match.amount}* as of *${currentDate}*`);
+    },
+    captureTransactionDateIntentFn: function (agent) {
+        const sessionId = agent.session.split('/').pop();
+        const phone = global.sessionStore?.[sessionId]?.phone;
+
+        if (!phone) {
+            agent.add("❗ Session expired. Please enter your contact number again.");
+            return;
+        }
+
+        const input = agent.query.toLowerCase();
+        let startDate, endDate;
+
+        // ✅ Handle fiscal year logic
+        const now = new Date();
+        const currentYear = now.getFullYear();
+        const currentMonth = now.getMonth(); // 0-indexed (0 = Jan)
+
+        if (input.includes("current financial year")) {
+            if (currentMonth < 3) {
+                startDate = new Date(currentYear - 1, 3, 1); // April 1 last year
+                endDate = new Date(currentYear, 2, 31);      // March 31 this year
+            } else {
+                startDate = new Date(currentYear, 3, 1);     // April 1 this year
+                endDate = new Date(currentYear + 1, 2, 31);  // March 31 next year
+            }
+        } else if (input.includes("previous financial year")) {
+            if (currentMonth < 3) {
+                startDate = new Date(currentYear - 2, 3, 1); // April 1 two years ago
+                endDate = new Date(currentYear - 1, 2, 31);  // March 31 last year
+            } else {
+                startDate = new Date(currentYear - 1, 3, 1); // April 1 last year
+                endDate = new Date(currentYear, 2, 31);      // March 31 this year
+            }
+        } else {
+            // ✅ Try to parse sys.date or sys.date-period
+            const rawDate = agent.parameters["date-period"] || agent.parameters["date"];
+            if (!rawDate) {
+                agent.add("⚠️ Please enter a valid date or range (e.g., April 2023, Jan 2023 to Mar 2024).");
+                return;
+            }
+
+            startDate = new Date(rawDate.startDate || rawDate);
+            endDate = new Date(rawDate.endDate || rawDate);
+        }
+
+        // 🚫 Validate date range
+        if (!startDate || !endDate || isNaN(startDate) || isNaN(endDate)) {
+            agent.add("❗ Invalid date format. Please try again.");
+            return;
+        }
+        if (endDate > new Date()) {
+            agent.add("🚫 Date cannot be in the future.");
+            return;
+        }
+
+        // 🔎 Filter transactions
+        const userData = portfolioData.find(u => u.mobile === phone);
+        if (!userData || !userData.transactions.length) {
+            agent.add("❌ No transactions found for this number.");
+            return;
+        }
+
+        const filtered = userData.transactions.filter(txn => {
+            const txnDate = new Date(txn.date);
+            return txnDate >= startDate && txnDate <= endDate;
+        });
+
+        if (!filtered.length) {
+            agent.add("📭 No transactions found in the selected date range.");
+            return;
+        }
+
+        const formattedTable = buildTransactionTable(phone, filtered);
+        handleTransactionHistory(formattedTable, agent);
+    },
+    userWantsToInvestMoreIntentFn: function (agent) {
+        agent.add(CONSTANTS.MESSAGE.invest_more_msg);
+        const fundCategories = fundData.map(item => item.category);
+        showQuickOptions(agent, fundCategories, CONSTANTS.MESSAGE.fund_category_continue);
+    },
+    userWantsToExitIntentFn: function (agent) {
+        const sessionId = agent.session.split('/').pop();
+        delete global.sessionStore[sessionId];
+        agent.add(CONSTANTS.MESSAGE.thankyou_msg);
     },
     fallbackIntentFn: function (agent) {
         agent.add(CONSTANTS.MESSAGE.invalid_input);
