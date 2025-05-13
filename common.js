@@ -80,10 +80,49 @@ function handleTransactionHistory(formattedTable, agent) {
     agent.add(payload);
 }
 
+function getCurrentFinancialYear() {
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth(); // 0-indexed (0 = Jan)
 
+    let startDate, endDate;
+
+    if (currentMonth < 3) { // Before April
+        startDate = new Date(currentYear - 1, 3, 1); // April 1 last year
+        endDate = new Date(currentYear, 2, 31);      // March 31 this year
+    } else {
+        startDate = new Date(currentYear, 3, 1);     // April 1 this year
+        endDate = new Date(currentYear + 1, 2, 31);  // March 31 next year
+    }
+
+    return { startDate, endDate };
+}
+
+function getPreviousFinancialYear() {
+    const { startDate: currentFYStart } = getCurrentFinancialYear();
+    const prevFYStart = new Date(currentFYStart);
+    prevFYStart.setFullYear(prevFYStart.getFullYear() - 1);
+
+    const prevFYEnd = new Date(currentFYStart);
+    prevFYEnd.setDate(prevFYEnd.getDate() - 1);
+
+    return { startDate: prevFYStart, endDate: prevFYEnd };
+}
+
+function debugDate(date, label = "Date") {
+    if (!date || isNaN(date.getTime())) {
+        console.log(`${label}: INVALID DATE`);
+        return;
+    }
+
+    console.log(`${label}: ${date.toISOString()} (${date.toLocaleDateString()})`);
+}
 module.exports = {
     showQuickOptions,
     showPortfolioOptions,
     buildTransactionTable,
-    handleTransactionHistory
+    handleTransactionHistory,
+    getCurrentFinancialYear,
+    getPreviousFinancialYear,
+    debugDate
 };

@@ -10,6 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "chrono-node": "^2.8.0",
     "dialogflow-fulfillment": "^0.6.1",
     "express": "^5.1.0"
   }

@@ -1,8 +1,9 @@
-const { showQuickOptions, showPortfolioOptions, buildTransactionTable, handleTransactionHistory } = require('./common');
+const chrono = require('chrono-node');
 const CONSTANTS = require('./constant');
 const greetingData = require('./greeting.json');
 const fundData = require('./fund&category.json');
 const portfolioData = require('./transactionhistory.json');
+const { showQuickOptions, showPortfolioOptions, buildTransactionTable, handleTransactionHistory, getCurrentFinancialYear, getPreviousFinancialYear } = require('./common');
 
 const intentFunctions = {
     welcomeIntentFn: function (agent) {
@@ -121,7 +122,12 @@ const intentFunctions = {
             return;
         }
 
-        agent.add(`📄 Transaction History for ${user.phone}:\n- ₹10,000 invested in Equity Fund\n- ₹5,000 redeemed from Hybrid Fund`);
+        agent.context.set({
+            name: 'awaiting_transaction_date',
+            lifespan: 2
+        });
+
+        agent.add("📅 Kindly enter a date or select a period:\n- Current Financial Year\n- Previous Financial Year");
     },
     captureContactIntentFn: function (agent) {
         const sessionId = agent.session.split('/').pop();
@@ -202,6 +208,14 @@ const intentFunctions = {
         agent.add(`📈 Your Portfolio *${match.fund_id}* valuation is *${match.amount}* as of *${currentDate}*`);
     },
     captureTransactionDateIntentFn: function (agent) {
+        const activeContexts = agent.contexts;
+        const hasDateContext = activeContexts.some(ctx => ctx.name.includes('awaiting_transaction_date'));
+
+        if (!hasDateContext) {
+            agent.add("⚠️ Unexpected input. Let's start again from the main menu.");
+            return;
+        }
+
         const sessionId = agent.session.split('/').pop();
         const phone = global.sessionStore?.[sessionId]?.phone;
 
@@ -210,53 +224,56 @@ const intentFunctions = {
             return;
         }
 
-        const input = agent.query.toLowerCase();
+        const rawText = agent.query?.toLowerCase() || '';
         let startDate, endDate;
 
-        // ✅ Handle fiscal year logic
-        const now = new Date();
-        const currentYear = now.getFullYear();
-        const currentMonth = now.getMonth(); // 0-indexed (0 = Jan)
+        if (rawText.includes("current financial year")) {
+            const { startDate: fyStart, endDate: fyEnd } = getCurrentFinancialYear();
+            startDate = fyStart;
+            endDate = fyEnd;
+        }
+        else if (rawText.includes("previous financial year")) {
+            const { startDate: fyStart, endDate: fyEnd } = getPreviousFinancialYear();
+            startDate = fyStart;
+            endDate = fyEnd;
+        }
+        else if (/^\d{4}-\d{2}-\d{2}$/.test(rawText)) {
+            const [year, month, day] = rawText.split('-').map(Number);
+            startDate = new Date(year, month - 1, day, 0, 0, 0, 0);
+            endDate = new Date(year, month - 1, day, 23, 59, 59, 999);
+        }
+        else {
+            try {
+                const parsedRange = chrono.parse(rawText);
 
-        if (input.includes("current financial year")) {
-            if (currentMonth < 3) {
-                startDate = new Date(currentYear - 1, 3, 1); // April 1 last year
-                endDate = new Date(currentYear, 2, 31);      // March 31 this year
-            } else {
-                startDate = new Date(currentYear, 3, 1);     // April 1 this year
-                endDate = new Date(currentYear + 1, 2, 31);  // March 31 next year
-            }
-        } else if (input.includes("previous financial year")) {
-            if (currentMonth < 3) {
-                startDate = new Date(currentYear - 2, 3, 1); // April 1 two years ago
-                endDate = new Date(currentYear - 1, 2, 31);  // March 31 last year
-            } else {
-                startDate = new Date(currentYear - 1, 3, 1); // April 1 last year
-                endDate = new Date(currentYear, 2, 31);      // March 31 this year
-            }
-        } else {
-            // ✅ Try to parse sys.date or sys.date-period
-            const rawDate = agent.parameters["date-period"] || agent.parameters["date"];
-            if (!rawDate) {
-                agent.add("⚠️ Please enter a valid date or range (e.g., April 2023, Jan 2023 to Mar 2024).");
+                if (!parsedRange.length) {
+                    agent.add("⚠️ Please enter a valid date or date range (e.g., 'April 2023', '10 April 2024 to 25 April 2024').");
+                    return;
+                }
+
+                const result = parsedRange[0];
+                startDate = result.start?.date();
+                endDate = result.end?.date() || startDate;
+            } catch (error) {
+                console.error("Error parsing date with chrono:", error);
+                agent.add("❗ I couldn't understand that date format. Please try again with a clearer date or range.");
                 return;
             }
-
-            startDate = new Date(rawDate.startDate || rawDate);
-            endDate = new Date(rawDate.endDate || rawDate);
         }
 
-        // 🚫 Validate date range
-        if (!startDate || !endDate || isNaN(startDate) || isNaN(endDate)) {
+        if (!startDate || !endDate || isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
             agent.add("❗ Invalid date format. Please try again.");
             return;
         }
+
         if (endDate > new Date()) {
             agent.add("🚫 Date cannot be in the future.");
             return;
         }
 
-        // 🔎 Filter transactions
+        startDate.setHours(0, 0, 0, 0);
+        endDate.setHours(23, 59, 59, 999);
+
         const userData = portfolioData.find(u => u.mobile === phone);
         if (!userData || !userData.transactions.length) {
             agent.add("❌ No transactions found for this number.");
@@ -264,7 +281,8 @@ const intentFunctions = {
         }
 
         const filtered = userData.transactions.filter(txn => {
-            const txnDate = new Date(txn.date);
+            const [year, month, day] = txn.date.split('-').map(Number);
+            const txnDate = new Date(year, month - 1, day);
             return txnDate >= startDate && txnDate <= endDate;
         });
 
