@@ -13,7 +13,7 @@
             "Small Cap Equity": "20%"
           },
           "cagr": "15%",
-          "link": "https://dummy-link.com"
+          "link": "https://dummy-link.com/alpha"
         }
       },
       {
@@ -27,7 +27,35 @@
             "Small Cap Equity": "25%"
           },
           "cagr": "30%",
-          "link": "https://dummy-link.com"
+          "link": "https://dummy-link.com/delta"
+        }
+      },
+      {
+        "fund_id": "MF006",
+        "fund_name": "Zenith Equity Plus",
+        "details": {
+          "allocation": {
+            "Debt": "10%",
+            "Large Cap Equity": "50%",
+            "Mid Cap Equity": "30%",
+            "Small Cap Equity": "10%"
+          },
+          "cagr": "18%",
+          "link": "https://dummy-link.com/zenith"
+        }
+      },
+      {
+        "fund_id": "MF009",
+        "fund_name": "Axis Focused Equity Fund",
+        "details": {
+          "allocation": {
+            "Debt": "0%",
+            "Large Cap Equity": "60%",
+            "Mid Cap Equity": "25%",
+            "Small Cap Equity": "15%"
+          },
+          "cagr": "20%",
+          "link": "https://dummy-link.com/axis"
         }
       }
     ]
@@ -40,13 +68,13 @@
         "fund_name": "Beta Income Fund",
         "details": {
           "allocation": {
-            "Debt": "30%",
-            "Large Cap Equity": "30%",
-            "Mid Cap Equity": "20%",
-            "Small Cap Equity": "20%"
+            "Debt": "80%",
+            "Large Cap Equity": "10%",
+            "Mid Cap Equity": "5%",
+            "Small Cap Equity": "5%"
           },
-          "cagr": "15%",
-          "link": "https://dummy-link.com"
+          "cagr": "8%",
+          "link": "https://dummy-link.com/beta"
         }
       },
       {
@@ -54,13 +82,27 @@
         "fund_name": "Omega Liquid Fund",
         "details": {
           "allocation": {
-            "Debt": "30%",
-            "Large Cap Equity": "20%",
-            "Mid Cap Equity": "20%",
-            "Small Cap Equity": "10%"
+            "Debt": "90%",
+            "Large Cap Equity": "5%",
+            "Mid Cap Equity": "3%",
+            "Small Cap Equity": "2%"
           },
-          "cagr": "16%",
-          "link": "https://dummy-link.com"
+          "cagr": "7%",
+          "link": "https://dummy-link.com/omega"
+        }
+      },
+      {
+        "fund_id": "MF007",
+        "fund_name": "SecureBond Ultra Fund",
+        "details": {
+          "allocation": {
+            "Debt": "95%",
+            "Large Cap Equity": "3%",
+            "Mid Cap Equity": "1%",
+            "Small Cap Equity": "1%"
+          },
+          "cagr": "6.5%",
+          "link": "https://dummy-link.com/securebond"
         }
       }
     ]
@@ -74,12 +116,26 @@
         "details": {
           "allocation": {
             "Debt": "40%",
-            "Large Cap Equity": "55%",
-            "Mid Cap Equity": "9%",
-            "Small Cap Equity": "17%"
+            "Large Cap Equity": "35%",
+            "Mid Cap Equity": "15%",
+            "Small Cap Equity": "10%"
           },
           "cagr": "10%",
-          "link": "https://dummy-link.com"
+          "link": "https://dummy-link.com/gamma"
+        }
+      },
+      {
+        "fund_id": "MF008",
+        "fund_name": "Blended Core Advantage",
+        "details": {
+          "allocation": {
+            "Debt": "35%",
+            "Large Cap Equity": "40%",
+            "Mid Cap Equity": "15%",
+            "Small Cap Equity": "10%"
+          },
+          "cagr": "12%",
+          "link": "https://dummy-link.com/blended"
         }
       }
     ]

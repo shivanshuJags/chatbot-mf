@@ -1,11 +1,11 @@
 const chrono = require('chrono-node');
 const path = require('path');
+const { generateTransactionExcel } = require('./excel_util');
 const CONSTANTS = require('./constant');
 const greetingData = require('./greeting.json');
 const fundData = require('./fund&category.json');
 const portfolioData = require('./transactionhistory.json');
-const { showQuickOptions, showPortfolioOptions, buildTransactionTable, handleTransactionHistory, getCurrentFinancialYear, getPreviousFinancialYear, handleExcelDownload } = require('./common');
-const { generateTransactionExcel } = require('./excel_util');
+const { showQuickOptions, showPortfolioOptions, buildTransactionTable, handleTransactionHistory, getCurrentFinancialYear, getPreviousFinancialYear, handleExcelDownload, replaceDynamicText } = require('./common');
 
 const intentFunctions = {
     welcomeIntentFn: function (agent) {
@@ -46,12 +46,12 @@ const intentFunctions = {
         );
 
         if (!matchedCategory) {
-            agent.add("Sorry, I couldn't find that category.");
+            agent.add(CONSTANTS.MESSAGE.no_category);
             return;
         }
 
         const fundNames = matchedCategory.funds.map(fund => fund.fund_name);
-        const message = `Here are the funds under *${selectedCategory}*. Please select one:`;
+        const message = replaceDynamicText(CONSTANTS.MESSAGE.select_category, selectedCategory);
 
         if (agent.requestSource === agent.TELEGRAM) {
             showQuickOptions(agent, fundNames, message);
@@ -69,7 +69,7 @@ const intentFunctions = {
         }
 
         if (!fundFound) {
-            agent.add("Sorry, I couldn’t find that fund.");
+            agent.add(CONSTANTS.MESSAGE.no_fund);
             return;
         }
 

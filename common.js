@@ -7,6 +7,7 @@ function showQuickOptions(agent, options, displayMsg) {
     const telegramPayload = {
         telegram: {
             text: displayMsg,
+            parse_mode: "HTML",
             reply_markup: {
                 inline_keyboard: options.map(option => [
                     { text: option, callback_data: option }
@@ -39,25 +40,17 @@ function showPortfolioOptions(agent, phone) {
 
 function buildTransactionTable(phone, transactions) {
     let message = `📋 Transactions for ${phone}:\n\n`;
-
-    // Start with monospace formatting using <code> tags which is well-supported
     message += "<code>";
-
-    // Add headers with proper spacing
     message += "Date       | Fund Name            | Amount\n";
     message += "-----------|-----------------------|----------\n";
 
-    // Add each transaction with consistent spacing
     transactions.forEach(t => {
         const date = t.date.padEnd(10);
         const fund = t.fund_name.padEnd(22);
         const amount = `₹ ${t.amount.toString().padStart(7)}`;
         message += `${date} | ${fund} | ${amount}\n`;
     });
-
-    // Close the monospace block
     message += "</code>";
-
     return message;
 }
 
@@ -134,6 +127,20 @@ function debugDate(date, label = "Date") {
 
     console.log(`${label}: ${date.toISOString()} (${date.toLocaleDateString()})`);
 }
+
+function replaceDynamicText(template, value) {
+    const safeValue = escapeHtml(value);
+    return template.replace('%s', `${safeValue}`);
+}
+
+function escapeHtml(str) {
+    return str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
 module.exports = {
     showQuickOptions,
     showPortfolioOptions,
@@ -142,5 +149,6 @@ module.exports = {
     getCurrentFinancialYear,
     getPreviousFinancialYear,
     handleExcelDownload,
+    replaceDynamicText,
     debugDate
 };
