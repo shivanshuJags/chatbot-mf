@@ -29,8 +29,11 @@ module.exports = {
         transaction_history: "Transaction History",
         portfolio_selection: "Select Portfolio",
         capture_txn_date: 'Capture Transaction Date',
+        invest_now: 'Invest Now',
         user_invest_more: 'User Wants to Invest More',
+        capture_investment_amount: 'Capture Investment Amount',
         user_exit: 'User Wants to Exit',
-        download_txn_intent: 'Download Transaction Excel'
+        download_txn_intent: 'Download Transaction Excel',
+        view_chart: 'View Chart'
     }
 }

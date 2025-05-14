@@ -1,4 +1,4 @@
-const { Payload } = require('dialogflow-fulfillment');
+const { Payload, Image } = require('dialogflow-fulfillment');
 const transaction_history = require('./transactionhistory.json');
 const { MESSAGE } = require('./constant');
 
@@ -74,6 +74,34 @@ function handleTransactionHistory(formattedTable, agent) {
     agent.add(payload);
 }
 
+function buildFundDisplay(agent, fundDetails, selectedFund) {
+    const { allocation, cagr, link } = fundDetails;
+    const safeFund = escapeHtml(selectedFund);
+
+    let message = `<b>📘 ${safeFund}</b>\n\n`;
+    message += `<b>💼 Fund Allocation:</b>\n`;
+    message += `💰 <b>Debt:</b> ${allocation.Debt}\n`;
+    message += `📈 <b>Large Cap Equity:</b> ${allocation["Large Cap Equity"]}\n`;
+    message += `📉 <b>Mid Cap Equity:</b> ${allocation["Mid Cap Equity"]}\n`;
+    message += `📊 <b>Small Cap Equity:</b> ${allocation["Small Cap Equity"]}\n`;
+    message += `<b>📈 CAGR:</b> ${cagr}\n`;
+    message += `🔗 <a href="${link}">More Details</a>`;
+
+    const combinedPayload = {
+        text: `${message}`,
+        parse_mode: 'HTML',
+        reply_markup: {
+            inline_keyboard: [
+                [{ text: "📊 View Pie Chart", callback_data: "view_chart" }],
+                [{ text: "Invest Now", callback_data: "Invest Now" }],
+                [{ text: "Main Menu", callback_data: "Main Menu" }]
+            ]
+        }
+    };
+    const payload = new Payload(agent.TELEGRAM, combinedPayload, { sendAsMessage: true });
+    agent.add(payload);
+}
+
 function handleExcelDownload(agent, downloadUrl) {
 
     const telegramPayload = {
@@ -88,6 +116,34 @@ function handleExcelDownload(agent, downloadUrl) {
     };
 
     agent.add(new Payload(agent.TELEGRAM, telegramPayload, { sendAsMessage: true, rawPayload: true }));
+}
+function handleViewChart(agent, fund) {
+    // Create a custom payload that exactly matches Telegram's requirements
+    const telegramPayload = {
+        telegram: {
+            // Use the exact Telegram Bot API endpoint structure
+            method: 'sendPhoto',
+            parameters: {
+                photo: fund.chart,
+                caption: `📊 Allocation chart for ${fund.fund_name}`,
+                reply_markup: JSON.stringify({
+                    inline_keyboard: [
+                        [{ text: "Invest Now", callback_data: "Invest Now" }],
+                        [{ text: "Main Menu", callback_data: "Main Menu" }]
+                    ]
+                })
+            }
+        }
+    };
+
+    // Add debugging
+    console.log('Attempting to send Telegram photo with payload:', JSON.stringify(telegramPayload));
+
+    // Send using Payload
+    agent.add(new Payload(agent.TELEGRAM, telegramPayload));
+
+    // Add a fallback text response just in case
+    agent.add(`Here's the allocation chart for ${fund.fund_name}`);
 }
 
 function getCurrentFinancialYear() {
@@ -124,8 +180,6 @@ function debugDate(date, label = "Date") {
         console.log(`${label}: INVALID DATE`);
         return;
     }
-
-    console.log(`${label}: ${date.toISOString()} (${date.toLocaleDateString()})`);
 }
 
 function replaceDynamicText(template, value) {
@@ -149,6 +203,8 @@ module.exports = {
     getCurrentFinancialYear,
     getPreviousFinancialYear,
     handleExcelDownload,
+    handleViewChart,
     replaceDynamicText,
+    buildFundDisplay,
     debugDate
 };
