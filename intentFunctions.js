@@ -11,12 +11,10 @@ const intentFunctions = {
     welcomeIntentFn: function (agent) {
         const sessionId = agent.session.split('/').pop();
 
-        // Clear any stored session info
-        if (global.sessionStore?.[sessionId]) {
+        if (global.sessionStore) {
             delete global.sessionStore[sessionId];
         }
 
-        // Clear all active contexts
         agent.contexts.forEach(ctx => {
             const contextName = ctx.name.split('/').pop();
             agent.context.set({
@@ -32,8 +30,13 @@ const intentFunctions = {
         }
     },
     exploreFundsIntentFn: function (agent) {
-        console.log('exploreFundsIntentFn');
         const categories = fundData.map(item => item.category);
+
+        if (!categories.length) {
+            agent.add(CONSTANTS.MESSAGE.no_category);
+            return;
+        }
+
         if (agent.requestSource === agent.TELEGRAM) {
             showQuickOptions(agent, categories, CONSTANTS.MESSAGE.explore_funds_greeting);
         } else {
@@ -41,20 +44,21 @@ const intentFunctions = {
         }
     },
     categorySelectionIntentFn: function (agent) {
-        const selectedCategory = agent.query;
-        const matchedCategory = fundData.find(
-            item => item.category.toLowerCase() === selectedCategory.toLowerCase()
+        const selectedCategory = agent.query.toLowerCase().trim();
+        const matchedCategory = fundData.find(item =>
+            selectedCategory.includes(item.category.toLowerCase())
         );
 
         if (!matchedCategory) {
             agent.add(CONSTANTS.MESSAGE.no_category);
+            const options = fundData.map(f => f.category);
+            showQuickOptions(agent, options, CONSTANTS.MESSAGE.explore_funds_greeting);
             return;
         }
 
         const fundNames = matchedCategory.funds.map(fund => fund.fund_name);
-        const message = replaceDynamicText(CONSTANTS.MESSAGE.select_category, selectedCategory);
+        const message = replaceDynamicText(CONSTANTS.MESSAGE.select_category, matchedCategory.category);
 
-        console.log('categorySelectionIntentFn');
         if (agent.requestSource === agent.TELEGRAM) {
             showQuickOptions(agent, fundNames, message);
         } else {
@@ -174,13 +178,13 @@ const intentFunctions = {
             const userRecord = portfolioData.find(u => u.mobile === phone);
 
             if (!userRecord || !userRecord.transactions || userRecord.transactions.length === 0) {
-                agent.add("❌ No record found for this number. Please register or try again later.");
+                agent.add(CONSTANTS.MESSAGE.no_record_msg);
                 showQuickOptions(agent, ["Main Menu"], "Would you like to go back?");
                 return;
             }
 
-            const amounts = ['1000', '2000', '5000', '10000'];
-            showQuickOptions(agent, amounts, "💸 Please enter or select an investment amount (less than ₹50,000):");
+            const amounts = CONSTANTS.MESSAGE.investment_amount_options;
+            showQuickOptions(agent, amounts, CONSTANTS.MESSAGE.select_investment_amount);
         } else {
             agent.add(`✅ test`);
         }
@@ -361,26 +365,38 @@ const intentFunctions = {
     investNowIntentFn: function (agent) {
         const sessionId = agent.session.split('/').pop();
         const phone = global.sessionStore?.[sessionId]?.phone;
-        const selectedService = global.sessionStore?.[sessionId]?.selectedService;
+        // const selectedService = global.sessionStore?.[sessionId]?.selectedService;
         if (!phone) {
             agent.context.set({
                 name: 'awaiting_phone',
                 lifespan: 2,
                 parameters: { followup: CONSTANTS.INTENT_NAME.invest_now }
             });
+            agent.add(replaceDynamicText(CONSTANTS.MESSAGE.enter_mobile, 'investment'));
+        } else {
+            agent.context.set({
+                name: 'awaiting_investment_amount',
+                lifespan: 2
+            });
+            const userRecord = portfolioData.find(u => u.mobile === phone);
 
-            agent.add("📞 Please enter your 10-digit mobile number to proceed with investment.");
-            return;
+            if (!userRecord || !userRecord.transactions || userRecord.transactions.length === 0) {
+                agent.add(CONSTANTS.MESSAGE.no_record_msg);
+                showQuickOptions(agent, ["Main Menu"], "Would you like to go back?");
+                return;
+            }
+
+            const amounts = CONSTANTS.MESSAGE.investment_amount_options;
+            showQuickOptions(agent, amounts, CONSTANTS.MESSAGE.select_investment_amount);
         }
     },
     captureInvestmentAmountFn: function (agent) {
         const sessionId = agent.session.split('/').pop();
         const phone = global.sessionStore?.[sessionId]?.phone;
         const selectedFund = global.sessionStore?.[sessionId]?.lastSelectedFund;
-
         const inputAmount = agent.query?.trim();
         const amount = Number(inputAmount);
-        if (!phone || !selectedFund["fund_id"] || !selectedFund["fund_name"]) {
+        if (!phone || !selectedFund?.fund_id || !selectedFund?.fund_name) {
             agent.add("⚠️ Something went wrong. Please start again from the main menu.");
             return;
         }
@@ -396,9 +412,10 @@ const intentFunctions = {
         const investment = {
             date: new Date().toISOString().split("T")[0],
             amount,
-            fund_name: selectedFund["fund_name"]
+            fund_name: selectedFund?.fund_name
         };
-        agent.add(` Thank you for investing ₹${amount} in *${selectedFund["fund_name"]}* on *${investment.date}*.\nWe appreciate your trust in us! 🙏`);
+        const message = ` Thank you for investing ₹${amount} in <b>${selectedFund?.fund_name}</b> on <b>${investment.date}</b>.\nWe appreciate your trust in us! 🙏`;
+        showQuickOptions(agent, [], message);
     },
     userWantsToInvestMoreIntentFn: function (agent) {
         agent.add(CONSTANTS.MESSAGE.invest_more_msg);

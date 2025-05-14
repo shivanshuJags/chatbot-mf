@@ -9,15 +9,14 @@ function showQuickOptions(agent, options, displayMsg) {
             text: displayMsg,
             parse_mode: "HTML",
             reply_markup: {
-                inline_keyboard: options.map(option => [
+                inline_keyboard: options?.map(option => [
                     { text: option, callback_data: option }
-                ]),
+                ]) || [],
                 one_time_keyboard: true,
                 resize_keyboard: true
             }
         }
     }
-
     const payload = new Payload(agent.TELEGRAM, telegramPayload, { sendAsMessage: true, rawPayload: true });
     agent.add(payload);
 }
