@@ -1,12 +1,15 @@
 const chrono = require('chrono-node');
 const path = require('path');
+const fs = require('fs');
 const { generateTransactionExcel } = require('./excel_util');
 const CONSTANTS = require('./constant');
 const greetingData = require('./greeting.json');
 const fundData = require('./fund&category.json');
 const portfolioData = require('./transactionhistory.json');
-const { showQuickOptions, showPortfolioOptions, buildTransactionTable, handleTransactionHistory, getCurrentFinancialYear, getPreviousFinancialYear, handleExcelDownload, replaceDynamicText, buildFundDisplay, handleViewChart } = require('./common');
+const { showQuickOptions, showPortfolioOptions, buildTransactionTable, handleTransactionHistory, getCurrentFinancialYear, getPreviousFinancialYear, handleExcelDownload, replaceDynamicText, buildFundDisplay, handleViewChart, getPortfolioData } = require('./common');
 
+
+const transactionFilePath = path.join(__dirname, 'transactionhistory.json');
 const intentFunctions = {
     welcomeIntentFn: function (agent) {
         const sessionId = agent.session.split('/').pop();
@@ -143,7 +146,7 @@ const intentFunctions = {
 
         agent.context.set({
             name: 'awaiting_transaction_date',
-            lifespan: 2, 
+            lifespan: 2,
             parmeters: {
                 phone
             }
@@ -191,6 +194,7 @@ const intentFunctions = {
                 name: 'awaiting_investment_amount',
                 lifespan: 2
             });
+            const portfolioData = getPortfolioData();
             const userRecord = portfolioData.find(u => u.mobile === phone);
 
             if (!userRecord || !userRecord.transactions || userRecord.transactions.length === 0) {
@@ -228,7 +232,7 @@ const intentFunctions = {
             agent.add("❗ Contact number is missing. Please re-enter your mobile number.");
             return;
         }
-
+        const portfolioData = getPortfolioData();
         const userPortfolio = portfolioData.find(u => u.mobile === phone);
         if (!userPortfolio) {
             agent.add("🚫 No portfolios found for this number.");
@@ -320,6 +324,7 @@ const intentFunctions = {
         startDate.setHours(0, 0, 0, 0);
         endDate.setHours(23, 59, 59, 999);
 
+        const portfolioData = getPortfolioData();
         const userData = portfolioData.find(u => u.mobile === phone);
         if (!userData || !userData.transactions.length) {
             agent.add("❌ No transactions found for this number.");
@@ -352,6 +357,7 @@ const intentFunctions = {
             return;
         }
 
+        const portfolioData = getPortfolioData();
         const userData = portfolioData.find(u => u.mobile === phone);
         if (!userData || !userData.transactions.length) {
             agent.add("📭 No transactions found.");
@@ -397,6 +403,7 @@ const intentFunctions = {
                 name: 'awaiting_investment_amount',
                 lifespan: 2
             });
+            const portfolioData = getPortfolioData();
             const userRecord = portfolioData.find(u => u.mobile === phone);
 
             if (!userRecord || !userRecord.transactions || userRecord.transactions.length === 0) {
@@ -413,8 +420,10 @@ const intentFunctions = {
         const sessionId = agent.session.split('/').pop();
         const phone = global.sessionStore?.[sessionId]?.phone;
         const selectedFund = global.sessionStore?.[sessionId]?.lastSelectedFund;
+
         const inputAmount = agent.query?.trim();
         const amount = Number(inputAmount);
+
         if (!phone || !selectedFund?.fund_id || !selectedFund?.fund_name) {
             agent.add("⚠️ Something went wrong. Please start again from the main menu.");
             return;
@@ -428,12 +437,29 @@ const intentFunctions = {
             return;
         }
 
-        const investment = {
-            date: new Date().toISOString().split("T")[0],
+        const today = new Date().toISOString().split("T")[0];
+        const newTransaction = {
+            date: today,
             amount,
-            fund_name: selectedFund?.fund_name
+            fund_name: selectedFund.fund_name,
+            fund_id: selectedFund.fund_id
         };
-        const message = ` Thank you for investing ₹${amount} in <b>${selectedFund?.fund_name}</b> on <b>${investment.date}</b>.\nWe appreciate your trust in us! 🙏`;
+
+        const portfolioData = getPortfolioData();
+        const user = portfolioData.find(u => u.mobile === phone);
+
+        if (user) {
+            user.transactions.push(newTransaction);
+        } else {
+            portfolioData.push({
+                mobile: phone,
+                name: "New User",
+                transactions: [newTransaction]
+            });
+        }
+
+        fs.writeFileSync(transactionFilePath, JSON.stringify(portfolioData, null, 2));
+        const message = ` Thank you for investing ₹${amount} in <b>${selectedFund?.fund_name}</b> on <b>${today}</b>.\nWe appreciate your trust in us! 🙏`;
         showQuickOptions(agent, [], message);
     },
     userWantsToInvestMoreIntentFn: function (agent) {

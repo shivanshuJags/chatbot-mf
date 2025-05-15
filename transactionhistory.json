@@ -1,7 +1,7 @@
 [
   {
     "name": "Ankit Sharma",
-    "mobile": "5656565656",
+    "mobile": "9999999999",
     "transactions": [
       {
         "date": "2024-04-01",
@@ -12,6 +12,18 @@
       {
         "date": "2024-04-10",
         "amount": 2000,
+        "fund_name": "Beta Income Fund",
+        "fund_id": "MF002"
+      },
+      {
+        "date": "2025-05-15",
+        "amount": 44000,
+        "fund_name": "Gamma Balanced Fund",
+        "fund_id": "MF003"
+      },
+      {
+        "date": "2025-05-15",
+        "amount": 50000,
         "fund_name": "Beta Income Fund",
         "fund_id": "MF002"
       }
@@ -73,6 +85,12 @@
         "amount": 40000,
         "fund_name": "New Alpha Value Fund",
         "fund_id": "MF008"
+      },
+      {
+        "date": "2025-05-15",
+        "amount": 34000,
+        "fund_name": "Omega Liquid Fund",
+        "fund_id": "MF005"
       }
     ]
   },

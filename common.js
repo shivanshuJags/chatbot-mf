@@ -1,7 +1,11 @@
 const { Payload, Image } = require('dialogflow-fulfillment');
 const axios = require('axios');
+const fs = require('fs');
+const path = require('path');
 const transaction_history = require('./transactionhistory.json');
 const { MESSAGE } = require('./constant');
+const transactionFilePath = path.join(__dirname, 'transactionhistory.json');
+
 require('dotenv').config();
 function showQuickOptions(agent, options, displayMsg) {
 
@@ -236,6 +240,11 @@ function debugDate(date, label = "Date") {
     }
 }
 
+function getPortfolioData() {
+    const data = fs.readFileSync(transactionFilePath, 'utf-8');
+    return JSON.parse(data);
+}
+
 function replaceDynamicText(template, value) {
     const safeValue = escapeHtml(value);
     return template.replace('%s', `${safeValue}`);
@@ -260,5 +269,6 @@ module.exports = {
     handleViewChart,
     replaceDynamicText,
     buildFundDisplay,
+    getPortfolioData,
     debugDate
 };
