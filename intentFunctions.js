@@ -380,7 +380,7 @@ const intentFunctions = {
             .flatMap(cat => cat.funds)
             .find(f => f.fund_id === selectedFund.fund_id);
 
-        if (!fund || !fund.chart) {
+        if (!fund) {
             agent.add(CONSTANTS.MESSAGE.no_chart);
             return;
         }
