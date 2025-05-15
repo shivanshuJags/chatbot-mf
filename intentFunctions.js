@@ -117,10 +117,16 @@ const intentFunctions = {
                 ...global.sessionStore[sessionId],
                 followup: CONSTANTS.INTENT_NAME.portfolio_valuation
             };
-            agent.add(replaceDynamicText(CONSTANTS.MESSAGE.enter_mobile, ''));
+            agent.add(replaceDynamicText(CONSTANTS.MESSAGE.enter_mobile, 'flow'));
             return;
         }
-        agent.add(CONSTANTS.MESSAGE.something_wrong);
+        agent.context.set({
+            name: 'awaiting_portfolio_selection',
+            lifespan: 2,
+            parameters: { phone: user.phone }
+        });
+
+        showPortfolioOptions(agent, user.phone);
     },
     transactionHistoryIntentFn: function (agent) {
         const sessionId = agent.session.split('/').pop();
@@ -138,7 +144,7 @@ const intentFunctions = {
                 lifespan: 2,
                 parameters: { followup: 'Transaction History' }
             });
-            agent.add(replaceDynamicText(CONSTANTS.MESSAGE.enter_mobile, ''));
+            agent.add(replaceDynamicText(CONSTANTS.MESSAGE.enter_mobile, 'flow'));
             return;
         }
 
@@ -205,7 +211,7 @@ const intentFunctions = {
             const amounts = CONSTANTS.MESSAGE.investment_amount_options;
             showQuickOptions(agent, amounts, CONSTANTS.MESSAGE.select_investment_amount);
         } else {
-            agent.add(`✅ test`);
+            agent.add(CONSTANTS.MESSAGE.something_wrong);
         }
     },
     reEnterContactFn: function (agent) {
@@ -220,7 +226,7 @@ const intentFunctions = {
             }
         });
 
-        agent.add(`${CONSTANTS.MESSAGE.enter_mobile} again`);
+        agent.add(replaceDynamicText(CONSTANTS.MESSAGE.enter_mobile, 'flow'));
     },
     selectPortfolioIntentFn: function (agent) {
         const selectedPortfolio = agent.query;
@@ -228,7 +234,7 @@ const intentFunctions = {
         const phone = global.sessionStore?.[sessionId]?.phone;
 
         if (!phone) {
-            agent.add(`${CONSTANTS.MESSAGE.enter_mobile} again`);
+            agent.add(replaceDynamicText(CONSTANTS.MESSAGE.enter_mobile, 'flow'));
             return;
         }
         const portfolioData = getPortfolioData();
@@ -330,11 +336,30 @@ const intentFunctions = {
             return;
         }
 
-        const filtered = userData.transactions.filter(txn => {
-            const [year, month, day] = txn.date.split('-').map(Number);
-            const txnDate = new Date(year, month - 1, day);
-            return txnDate >= startDate && txnDate <= endDate;
+        const filtered = [];
+        userData.transactions.forEach(txn => {
+            if (txn.history && Array.isArray(txn.history)) {
+                txn.history.forEach(entry => {
+                    const [y, m, d] = entry.deposit_date.split('-').map(Number);
+                    const entryDate = new Date(y, m - 1, d);
+                    if (entryDate >= startDate && entryDate <= endDate) {
+                        filtered.push({
+                            date: entry.deposit_date,
+                            amount: entry.price,
+                            fund_name: txn.fund_name,
+                            fund_id: txn.fund_id
+                        });
+                    }
+                });
+            } else {
+                const [y, m, d] = txn.date.split('-').map(Number);
+                const txnDate = new Date(y, m - 1, d);
+                if (txnDate >= startDate && txnDate <= endDate) {
+                    filtered.push(txn);
+                }
+            }
         });
+
 
         if (!filtered.length) {
             agent.add(`${CONSTANTS.MESSAGE.no_transaction} in the selected date range.`);
