@@ -2,7 +2,6 @@ const { Payload, Image } = require('dialogflow-fulfillment');
 const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
-const transaction_history = require('./transactionhistory.json');
 const { MESSAGE } = require('./constant');
 const transactionFilePath = path.join(__dirname, 'transactionhistory.json');
 
@@ -27,7 +26,8 @@ function showQuickOptions(agent, options, displayMsg) {
 }
 
 function showPortfolioOptions(agent, phone) {
-    const userPortfolio = transaction_history.find(u => u.mobile === phone);
+    const portfolioData = getPortfolioData();
+    const userPortfolio = portfolioData.find(u => u.mobile === phone);
 
     if (!userPortfolio) {
         agent.add(MESSAGE.no_portfolio_found);
@@ -35,7 +35,7 @@ function showPortfolioOptions(agent, phone) {
         return;
     }
 
-    const options = userPortfolio.transactions.map(p => p.fund_name);
+    const options = userPortfolio.transactions.map(p => p.fund_name + ' Valuation');
 
     options.length > 0 ?
         showQuickOptions(agent, options, MESSAGE.select_portfolio_msg) :

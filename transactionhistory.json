@@ -4,28 +4,104 @@
     "mobile": "9999999999",
     "transactions": [
       {
-        "date": "2024-04-01",
-        "amount": 5000,
+        "date": "2024-03-15",
+        "amount": 7000,
         "fund_name": "Alpha Growth Fund",
-        "fund_id": "MF001"
+        "fund_id": "MF001",
+        "history": [
+          {
+            "deposit_date": "2024-04-01",
+            "price": 2000
+          },
+          {
+            "deposit_date": "2024-03-01",
+            "price": 3000
+          },
+          {
+            "deposit_date": "2024-01-01",
+            "price": 1000
+          },
+          {
+            "deposit_date": "2025-05-15",
+            "price": 1000
+          }
+        ]
       },
       {
-        "date": "2024-04-10",
-        "amount": 2000,
+        "date": "2024-02-15",
+        "amount": 4600,
         "fund_name": "Beta Income Fund",
-        "fund_id": "MF002"
+        "fund_id": "MF002",
+        "history": [
+          {
+            "deposit_date": "2023-04-01",
+            "price": 1200
+          },
+          {
+            "deposit_date": "2023-03-01",
+            "price": 1200
+          },
+          {
+            "deposit_date": "2024-05-01",
+            "price": 2000
+          },
+          {
+            "deposit_date": "2025-05-15",
+            "price": 200
+          }
+        ]
       },
       {
-        "date": "2025-05-15",
-        "amount": 44000,
+        "date": "2024-01-15",
+        "amount": 1201,
         "fund_name": "Gamma Balanced Fund",
-        "fund_id": "MF003"
+        "fund_id": "MF003",
+        "history": [
+          {
+            "deposit_date": "2025-02-15",
+            "price": 1201
+          }
+        ]
       },
       {
         "date": "2025-05-15",
-        "amount": 50000,
-        "fund_name": "Beta Income Fund",
-        "fund_id": "MF002"
+        "amount": 41201,
+        "fund_name": "Omega Liquid Fund",
+        "fund_id": "MF005",
+        "history": [
+          {
+            "deposit_date": "2025-02-15",
+            "price": 1201
+          },
+          {
+            "deposit_date": "2025-05-15",
+            "price": 40000
+          }
+        ]
+      },
+      {
+        "date": "2025-05-15",
+        "amount": 10000,
+        "fund_name": "Blended Core Advantage",
+        "fund_id": "MF008",
+        "history": [
+          {
+            "deposit_date": "2025-05-15",
+            "price": 10000
+          }
+        ]
+      },
+      {
+        "date": "2025-05-15",
+        "amount": 5690,
+        "fund_name": "Delta Tax Saver Fund",
+        "fund_id": "MF004",
+        "history": [
+          {
+            "deposit_date": "2025-05-15",
+            "price": 5690
+          }
+        ]
       }
     ]
   },
@@ -35,15 +111,26 @@
     "transactions": [
       {
         "date": "2025-04-15",
-        "amount": 3500,
+        "amount": 3600,
         "fund_name": "Gamma Balanced Fund",
-        "fund_id": "MF003"
+        "fund_id": "MF003",
+        "history": [
+          {
+            "deposit_date": "2023-02-19",
+            "price": 2200
+          },
+          {
+            "deposit_date": "2025-02-10",
+            "price": 1400
+          }
+        ]
       },
       {
         "date": "2025-04-20",
-        "amount": 1000,
+        "amount": 0,
         "fund_name": "Delta Tax Saver Fund",
-        "fund_id": "MF004"
+        "fund_id": "MF004",
+        "history": []
       }
     ]
   },
@@ -55,44 +142,7 @@
   {
     "name": "Neha Joshi",
     "mobile": "2222222222",
-    "transactions": [
-      {
-        "date": "2025-02-13",
-        "amount": 1000,
-        "fund_name": "Sigma Balanced Growth",
-        "fund_id": "MF007"
-      },
-      {
-        "date": "2025-11-02",
-        "amount": 1000,
-        "fund_name": "Theta Value Fund",
-        "fund_id": "MF008"
-      },
-      {
-        "date": "2024-12-11",
-        "amount": 2000,
-        "fund_name": "Theta Value Fund",
-        "fund_id": "MF008"
-      },
-      {
-        "date": "2025-12-11",
-        "amount": 9000,
-        "fund_name": "New Value Fund",
-        "fund_id": "MF008"
-      },
-      {
-        "date": "2025-03-03",
-        "amount": 40000,
-        "fund_name": "New Alpha Value Fund",
-        "fund_id": "MF008"
-      },
-      {
-        "date": "2025-05-15",
-        "amount": 34000,
-        "fund_name": "Omega Liquid Fund",
-        "fund_id": "MF005"
-      }
-    ]
+    "transactions": []
   },
   {
     "name": "Rohan Verma",
@@ -115,6 +165,18 @@
         "amount": 9000,
         "fund_name": "Red Balanced Growth",
         "fund_id": "MF007"
+      },
+      {
+        "date": "2025-05-15",
+        "amount": 2000,
+        "fund_name": "Gamma Balanced Fund",
+        "fund_id": "MF003",
+        "history": [
+          {
+            "deposit_date": "2025-05-15",
+            "price": 2000
+          }
+        ]
       }
     ]
   },
@@ -124,9 +186,23 @@
     "transactions": [
       {
         "date": "2024-10-30",
-        "amount": 5000,
+        "amount": 50000,
         "fund_name": "Zeta Equity Advantage",
-        "fund_id": "MF006"
+        "fund_id": "MF006",
+        "history": [
+          {
+            "deposit_date": "2024-02-19",
+            "price": 10000
+          },
+          {
+            "deposit_date": "2024-02-10",
+            "price": 35000
+          },
+          {
+            "deposit_date": "2024-02-10",
+            "price": 5000
+          }
+        ]
       }
     ]
   },
@@ -136,9 +212,19 @@
     "transactions": [
       {
         "date": "2024-05-01",
-        "amount": 4000,
+        "amount": 2000,
         "fund_name": "Theta Value Fund",
-        "fund_id": "MF008"
+        "fund_id": "MF008",
+        "history": [
+          {
+            "deposit_date": "2024-02-19",
+            "price": 1000
+          },
+          {
+            "deposit_date": "2024-02-10",
+            "price": 1000
+          }
+        ]
       }
     ]
   }

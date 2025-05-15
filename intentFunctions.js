@@ -5,11 +5,8 @@ const { generateTransactionExcel } = require('./excel_util');
 const CONSTANTS = require('./constant');
 const greetingData = require('./greeting.json');
 const fundData = require('./fund&category.json');
-const portfolioData = require('./transactionhistory.json');
 const { showQuickOptions, showPortfolioOptions, buildTransactionTable, handleTransactionHistory, getCurrentFinancialYear, getPreviousFinancialYear, handleExcelDownload, replaceDynamicText, buildFundDisplay, handleViewChart, getPortfolioData } = require('./common');
 
-
-const transactionFilePath = path.join(__dirname, 'transactionhistory.json');
 const intentFunctions = {
     welcomeIntentFn: function (agent) {
         const sessionId = agent.session.split('/').pop();
@@ -119,15 +116,15 @@ const intentFunctions = {
                 ...global.sessionStore[sessionId],
                 followup: CONSTANTS.INTENT_NAME.portfolio_valuation
             };
-            agent.add("📞 Kindly enter your registered contact number to proceed.");
+            agent.add(replaceDynamicText(CONSTANTS.MESSAGE.enter_mobile, ''));
             return;
         }
-
-        agent.add(`📊 Portfolio Value for ${user.phone}: ₹2,50,000 (sample).`);
+        agent.add(CONSTANTS.MESSAGE.something_wrong);
     },
     transactionHistoryIntentFn: function (agent) {
         const sessionId = agent.session.split('/').pop();
         const user = global.sessionStore?.[sessionId];
+        const phone = user?.phone;
 
         global.sessionStore[sessionId] = {
             ...global.sessionStore[sessionId],
@@ -140,7 +137,7 @@ const intentFunctions = {
                 lifespan: 2,
                 parameters: { followup: 'Transaction History' }
             });
-            agent.add("📞 Kindly enter your registered contact number to continue.");
+            agent.add(replaceDynamicText(CONSTANTS.MESSAGE.enter_mobile, ''));
             return;
         }
 
@@ -152,14 +149,15 @@ const intentFunctions = {
             }
         });
 
-        agent.add("📅 Kindly enter a date or select a period:\n- Current Financial Year\n- Previous Financial Year");
+        const options = ["Current Financial Year", "Previous Financial Year"];
+        showQuickOptions(agent, options, "📆");
     },
     captureContactIntentFn: function (agent) {
         const sessionId = agent.session.split('/').pop();
         const phone = agent.parameters["phone-number"];
 
         if (!/^\d{10}$/.test(phone)) {
-            agent.add("❗ Please enter a valid 10-digit mobile number.");
+            agent.add(CONSTANTS.MESSAGE.enter_number);
             return;
         }
 
@@ -179,7 +177,7 @@ const intentFunctions = {
 
         } else if (followupIntent === CONSTANTS.INTENT_NAME.transaction_history) {
             const options = ["Current Financial Year", "Previous Financial Year"];
-            showQuickOptions(agent, options, "📆 Kindly provide a time period to view your transaction history:");
+            showQuickOptions(agent, options, CONSTANTS.MESSAGE.select_year_type);
 
             // Set context so we can capture the date next
             agent.context.set({
@@ -221,7 +219,7 @@ const intentFunctions = {
             }
         });
 
-        agent.add("📞 Kindly enter your registered 10-digit mobile number.");
+        agent.add(`${CONSTANTS.MESSAGE.enter_mobile} again`);
     },
     selectPortfolioIntentFn: function (agent) {
         const selectedPortfolio = agent.query;
@@ -229,23 +227,23 @@ const intentFunctions = {
         const phone = global.sessionStore?.[sessionId]?.phone;
 
         if (!phone) {
-            agent.add("❗ Contact number is missing. Please re-enter your mobile number.");
+            agent.add(`${CONSTANTS.MESSAGE.enter_mobile} again`);
             return;
         }
         const portfolioData = getPortfolioData();
         const userPortfolio = portfolioData.find(u => u.mobile === phone);
         if (!userPortfolio) {
-            agent.add("🚫 No portfolios found for this number.");
+            agent.add(CONSTANTS.MESSAGE.no_portfolio_found_msg);
             showQuickOptions(agent, ["Invest"], "Would you like to invest instead?");
             return;
         }
-
-        const match = userPortfolio.transactions.find(p => p.fund_name === selectedPortfolio);
-
+        const match = userPortfolio.transactions.find(item =>
+            selectedPortfolio.includes(item.fund_name)
+        );
         if (!match) {
-            agent.add("❗ Invalid portfolio selection. Please choose again.");
-            const ids = userPortfolio.transactions.map(p => p.fund_id);
-            showQuickOptions(agent, ids, "Please select a valid portfolio:");
+            agent.add(CONSTANTS.MESSAGE.no_portfolio_found);
+            const fundName = userPortfolio.transactions.map(p => p.fund_name);
+            showQuickOptions(agent, fundName, "Please select a valid portfolio:");
             return;
         }
 
@@ -262,7 +260,7 @@ const intentFunctions = {
         const hasDateContext = activeContexts.some(ctx => ctx.name.includes('awaiting_transaction_date'));
 
         if (!hasDateContext) {
-            agent.add("⚠️ Unexpected input. Let's start again from the main menu.");
+            agent.add(CONSTANTS.MESSAGE.something_wrong);
             return;
         }
 
@@ -270,7 +268,7 @@ const intentFunctions = {
         const phone = global.sessionStore?.[sessionId]?.phone;
 
         if (!phone) {
-            agent.add("❗ Session expired. Please enter your contact number again.");
+            agent.add(CONSTANTS.MESSAGE.something_wrong);
             return;
         }
 
@@ -297,7 +295,7 @@ const intentFunctions = {
                 const parsedRange = chrono.parse(rawText);
 
                 if (!parsedRange.length) {
-                    agent.add("⚠️ Please enter a valid date or date range (e.g., 'April 2023', '10 April 2024 to 25 April 2024').");
+                    agent.add(CONSTANTS.MESSAGE.select_range);
                     return;
                 }
 
@@ -306,18 +304,18 @@ const intentFunctions = {
                 endDate = result.end?.date() || startDate;
             } catch (error) {
                 console.error("Error parsing date with chrono:", error);
-                agent.add("❗ I couldn't understand that date format. Please try again with a clearer date or range.");
+                agent.add(CONSTANTS.MESSAGE.date_format_error);
                 return;
             }
         }
 
         if (!startDate || !endDate || isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-            agent.add("❗ Invalid date format. Please try again.");
+            agent.add("Invalid date format. Please try again.");
             return;
         }
 
         if (endDate > new Date()) {
-            agent.add("🚫 Date cannot be in the future.");
+            agent.add("Date cannot be in the future.");
             return;
         }
 
@@ -327,7 +325,7 @@ const intentFunctions = {
         const portfolioData = getPortfolioData();
         const userData = portfolioData.find(u => u.mobile === phone);
         if (!userData || !userData.transactions.length) {
-            agent.add("❌ No transactions found for this number.");
+            agent.add(`${CONSTANTS.MESSAGE.no_transaction} in the selected date range.`);
             return;
         }
 
@@ -338,7 +336,7 @@ const intentFunctions = {
         });
 
         if (!filtered.length) {
-            agent.add("📭 No transactions found in the selected date range.");
+            agent.add(`${CONSTANTS.MESSAGE.no_transaction} in the selected date range.`);
             return;
         }
 
@@ -353,14 +351,14 @@ const intentFunctions = {
         const phone = global.sessionStore?.[sessionId]?.phone;
 
         if (!phone) {
-            agent.add("❗ Please enter your registered number again.");
+            agent.add(CONSTANTS.MESSAGE.enter_number);
             return;
         }
 
         const portfolioData = getPortfolioData();
         const userData = portfolioData.find(u => u.mobile === phone);
         if (!userData || !userData.transactions.length) {
-            agent.add("📭 No transactions found.");
+            agent.add(CONSTANTS.MESSAGE.no_transaction);
             return;
         }
 
@@ -373,7 +371,7 @@ const intentFunctions = {
         const sessionId = agent.session.split('/').pop();
         const selectedFund = global.sessionStore?.[sessionId]?.lastSelectedFund;
         if (!selectedFund.fund_id) {
-            agent.add("⚠️ No fund selected. Please choose a fund first.");
+            agent.add(CONSTANTS.MESSAGE.no_fund_selection);
             return;
         }
 
@@ -382,7 +380,7 @@ const intentFunctions = {
             .find(f => f.fund_id === selectedFund.fund_id);
 
         if (!fund || !fund.chart) {
-            agent.add("📉 Chart not available for this fund.");
+            agent.add(CONSTANTS.MESSAGE.no_chart);
             return;
         }
         await handleViewChart(agent, fund);
@@ -390,7 +388,6 @@ const intentFunctions = {
     investNowIntentFn: function (agent) {
         const sessionId = agent.session.split('/').pop();
         const phone = global.sessionStore?.[sessionId]?.phone;
-        // const selectedService = global.sessionStore?.[sessionId]?.selectedService;
         if (!phone) {
             agent.context.set({
                 name: 'awaiting_phone',
@@ -408,7 +405,7 @@ const intentFunctions = {
 
             if (!userRecord || !userRecord.transactions || userRecord.transactions.length === 0) {
                 agent.add(CONSTANTS.MESSAGE.no_record_msg);
-                showQuickOptions(agent, ["Main Menu"], "Would you like to go back?");
+                showQuickOptions(agent, ["Main Menu"], CONSTANTS.MESSAGE.something_wrong);
                 return;
             }
 
@@ -425,43 +422,60 @@ const intentFunctions = {
         const amount = Number(inputAmount);
 
         if (!phone || !selectedFund?.fund_id || !selectedFund?.fund_name) {
-            agent.add("⚠️ Something went wrong. Please start again from the main menu.");
+            agent.add(CONSTANTS.MESSAGE.something_wrong);
             return;
         }
 
-        // Validate amount
         if (isNaN(amount) || amount <= 0 || amount > 50000) {
-            agent.add("❗ Please enter a valid investment amount (numeric, less than ₹50,000).");
-            const amounts = ['1000', '2000', '5000', '10000'];
-            showQuickOptions(agent, amounts, "💸 Try again:");
+            agent.add(CONSTANTS.MESSAGE.select_investment_amount);
+            showQuickOptions(agent, CONSTANTS.MESSAGE.investment_amount_options, CONSTANTS.MESSAGE.tryAgain_investment);
             return;
         }
 
         const today = new Date().toISOString().split("T")[0];
-        const newTransaction = {
-            date: today,
-            amount,
-            fund_name: selectedFund.fund_name,
-            fund_id: selectedFund.fund_id
-        };
+        const fundId = selectedFund.fund_id;
+        const fundName = selectedFund.fund_name;
 
         const portfolioData = getPortfolioData();
         const user = portfolioData.find(u => u.mobile === phone);
 
-        if (user) {
-            user.transactions.push(newTransaction);
-        } else {
-            portfolioData.push({
-                mobile: phone,
-                name: "New User",
-                transactions: [newTransaction]
-            });
+        if (!user) {
+            agent.add(CONSTANTS.MESSAGE.no_portfolio_found_msg);
+            return;
         }
 
+        const fund = user.transactions.find(t => t.fund_id === fundId);
+
+        if (fund) {
+            if (!fund.history) fund.history = [];
+
+            fund.history.push({
+                deposit_date: today,
+                price: amount
+            });
+
+            fund.date = today;
+            fund.amount = fund.history.reduce((sum, entry) => sum + entry.price, 0);
+        } else {
+            user.transactions.push({
+                date: today,
+                amount,
+                fund_name: fundName,
+                fund_id: fundId,
+                history: [
+                    {
+                        deposit_date: today,
+                        price: amount
+                    }
+                ]
+            });
+        }
+        const transactionFilePath = path.join(__dirname, 'transactionhistory.json');
         fs.writeFileSync(transactionFilePath, JSON.stringify(portfolioData, null, 2));
-        const message = ` Thank you for investing ₹${amount} in <b>${selectedFund?.fund_name}</b> on <b>${today}</b>.\nWe appreciate your trust in us! 🙏`;
+        const message = `Thank you for investing ₹${amount} in <b>${fundName}</b> on <b>${today}</b>.\nWe appreciate your trust in us! 🙏`;
         showQuickOptions(agent, [], message);
-    },
+    }
+    ,
     userWantsToInvestMoreIntentFn: function (agent) {
         agent.add(CONSTANTS.MESSAGE.invest_more_msg);
         const fundCategories = fundData.map(item => item.category);
