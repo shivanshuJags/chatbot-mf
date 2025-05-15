@@ -59,6 +59,14 @@ const intentFunctions = {
         const fundNames = matchedCategory.funds.map(fund => fund.fund_name);
         const message = replaceDynamicText(CONSTANTS.MESSAGE.select_category, matchedCategory.category);
 
+        agent.context.set({
+            name: 'awaiting_fund_selection',
+            lifespan: 2,
+            parameters: {
+                category: matchedCategory.category
+            }
+        });
+
         if (agent.requestSource === agent.TELEGRAM) {
             showQuickOptions(agent, fundNames, message);
         } else {
@@ -135,7 +143,10 @@ const intentFunctions = {
 
         agent.context.set({
             name: 'awaiting_transaction_date',
-            lifespan: 2
+            lifespan: 2, 
+            parmeters: {
+                phone
+            }
         });
 
         agent.add("📅 Kindly enter a date or select a period:\n- Current Financial Year\n- Previous Financial Year");
@@ -156,6 +167,11 @@ const intentFunctions = {
         const followupIntent = agent.context.get('awaiting_phone')?.parameters?.followup;
 
         if (followupIntent === CONSTANTS.INTENT_NAME.portfolio_valuation) {
+            agent.context.set({
+                name: 'awaiting_portfolio_selection',
+                lifespan: 2,
+                parameters: { phone: phone }
+            });
             showPortfolioOptions(agent, phone);
 
         } else if (followupIntent === CONSTANTS.INTENT_NAME.transaction_history) {
@@ -234,7 +250,8 @@ const intentFunctions = {
             month: 'short',
             year: 'numeric'
         });
-        agent.add(`📈 Your Portfolio *${match.fund_id}* valuation is *${match.amount}* as of *${currentDate}*`);
+        const message = `Your Portfolio <b>${match.fund_id}</b> valuation is <b>${match.amount}</b> as of <b>${currentDate}</b>`
+        showQuickOptions(agent, [], message);
     },
     captureTransactionDateIntentFn: function (agent) {
         const activeContexts = agent.contexts;
@@ -320,7 +337,10 @@ const intentFunctions = {
             return;
         }
 
-        const formattedTable = buildTransactionTable(phone, filtered);
+        const recentTransactions = filtered
+            .sort((a, b) => new Date(b.date) - new Date(a.date))
+            .slice(0, 3);
+        const formattedTable = buildTransactionTable(userData, recentTransactions);
         handleTransactionHistory(formattedTable, agent);
     },
     downloadTransactionExcelIntentFn: async function (agent) {
@@ -343,24 +363,23 @@ const intentFunctions = {
         const downloadUrl = `https://n6274q7s-3000.inc1.devtunnels.ms/downloads/${path.basename(filePath)}`;
         handleExcelDownload(agent, downloadUrl);
     },
-    viewChartIntentFn: function (agent) {
+    viewChartIntentFn: async function (agent) {
         const sessionId = agent.session.split('/').pop();
-        const fundId = global.sessionStore?.[sessionId]?.lastSelectedFundId;
-
-        if (!fundId) {
+        const selectedFund = global.sessionStore?.[sessionId]?.lastSelectedFund;
+        if (!selectedFund.fund_id) {
             agent.add("⚠️ No fund selected. Please choose a fund first.");
             return;
         }
 
         const fund = fundData
             .flatMap(cat => cat.funds)
-            .find(f => f.fund_id === fundId);
+            .find(f => f.fund_id === selectedFund.fund_id);
 
         if (!fund || !fund.chart) {
             agent.add("📉 Chart not available for this fund.");
             return;
         }
-        handleViewChart(agent, fund);
+        await handleViewChart(agent, fund);
     },
     investNowIntentFn: function (agent) {
         const sessionId = agent.session.split('/').pop();

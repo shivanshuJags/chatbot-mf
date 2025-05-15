@@ -1,5 +1,6 @@
 [
   {
+    "name": "Ankit Sharma",
     "mobile": "5656565656",
     "transactions": [
       {
@@ -17,6 +18,7 @@
     ]
   },
   {
+    "name": "Riya Mehta",
     "mobile": "5656565651",
     "transactions": [
       {
@@ -34,7 +36,92 @@
     ]
   },
   {
+    "name": "Vikas Kapoor",
     "mobile": "1111111111",
     "transactions": []
+  },
+  {
+    "name": "Neha Joshi",
+    "mobile": "2222222222",
+    "transactions": [
+      {
+        "date": "2025-02-13",
+        "amount": 1000,
+        "fund_name": "Sigma Balanced Growth",
+        "fund_id": "MF007"
+      },
+      {
+        "date": "2025-11-02",
+        "amount": 1000,
+        "fund_name": "Theta Value Fund",
+        "fund_id": "MF008"
+      },
+      {
+        "date": "2024-12-11",
+        "amount": 2000,
+        "fund_name": "Theta Value Fund",
+        "fund_id": "MF008"
+      },
+      {
+        "date": "2025-12-11",
+        "amount": 9000,
+        "fund_name": "New Value Fund",
+        "fund_id": "MF008"
+      },
+      {
+        "date": "2025-03-03",
+        "amount": 40000,
+        "fund_name": "New Alpha Value Fund",
+        "fund_id": "MF008"
+      }
+    ]
+  },
+  {
+    "name": "Rohan Verma",
+    "mobile": "1234567890",
+    "transactions": [
+      {
+        "date": "2024-08-07",
+        "amount": 2000,
+        "fund_name": "Sigma Balanced Growth",
+        "fund_id": "MF007"
+      },
+      {
+        "date": "2024-09-16",
+        "amount": 4000,
+        "fund_name": "Sigma Balanced Growth",
+        "fund_id": "MF007"
+      },
+      {
+        "date": "2025-09-16",
+        "amount": 9000,
+        "fund_name": "Red Balanced Growth",
+        "fund_id": "MF007"
+      }
+    ]
+  },
+  {
+    "name": "Sana Ali",
+    "mobile": "9999999912",
+    "transactions": [
+      {
+        "date": "2024-10-30",
+        "amount": 5000,
+        "fund_name": "Zeta Equity Advantage",
+        "fund_id": "MF006"
+      }
+    ]
+  },
+  {
+    "name": "Manav Chauhan",
+    "mobile": "9999999913",
+    "transactions": [
+      {
+        "date": "2024-05-01",
+        "amount": 4000,
+        "fund_name": "Theta Value Fund",
+        "fund_id": "MF008"
+      }
+    ]
   }
 ]

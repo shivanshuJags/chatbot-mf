@@ -1,7 +1,8 @@
 const { Payload, Image } = require('dialogflow-fulfillment');
+const axios = require('axios');
 const transaction_history = require('./transactionhistory.json');
 const { MESSAGE } = require('./constant');
-
+require('dotenv').config();
 function showQuickOptions(agent, options, displayMsg) {
 
     const telegramPayload = {
@@ -37,11 +38,11 @@ function showPortfolioOptions(agent, phone) {
         showQuickOptions(agent, MESSAGE.no_portfolio_invest_options, MESSAGE.no_portfolio_found_msg)
 }
 
-function buildTransactionTable(phone, transactions) {
-    let message = `📋 Transactions for ${phone}:\n\n`;
+function buildTransactionTable(userData, transactions) {
+    let message = `📋 Transactions for ${userData.name} - (${userData.mobile}) (showing last ${transactions.length}):\n\n`;
     message += "<code>";
-    message += "Date       | Fund Name            | Amount\n";
-    message += "-----------|-----------------------|----------\n";
+    message += "Date       | Fund Name              | Amount\n";
+    message += "-----------|----------------------- |----------\n";
 
     transactions.forEach(t => {
         const date = t.date.padEnd(10);
@@ -79,10 +80,10 @@ function buildFundDisplay(agent, fundDetails, selectedFund) {
 
     let message = `<b>📘 ${safeFund}</b>\n\n`;
     message += `<b>💼 Fund Allocation:</b>\n`;
-    message += `💰 <b>Debt:</b> ${allocation.Debt}\n`;
-    message += `📈 <b>Large Cap Equity:</b> ${allocation["Large Cap Equity"]}\n`;
-    message += `📉 <b>Mid Cap Equity:</b> ${allocation["Mid Cap Equity"]}\n`;
-    message += `📊 <b>Small Cap Equity:</b> ${allocation["Small Cap Equity"]}\n`;
+    message += `💰 <b>Debt:</b> ${allocation.debt}\n`;
+    message += `📈 <b>Large Cap Equity:</b> ${allocation?.large_cap}\n`;
+    message += `📉 <b>Mid Cap Equity:</b> ${allocation?.mid_cap}\n`;
+    message += `📊 <b>Small Cap Equity:</b> ${allocation?.small_cap}\n`;
     message += `<b>📈 CAGR:</b> ${cagr}\n`;
     message += `🔗 <a href="${link}">More Details</a>`;
 
@@ -116,50 +117,105 @@ function handleExcelDownload(agent, downloadUrl) {
 
     agent.add(new Payload(agent.TELEGRAM, telegramPayload, { sendAsMessage: true, rawPayload: true }));
 }
-function handleViewChart(agent, fund) {
-    // Create a custom payload that exactly matches Telegram's requirements
-    const telegramPayload = {
-        telegram: {
-            // Use the exact Telegram Bot API endpoint structure
-            method: 'sendPhoto',
-            parameters: {
-                photo: fund.chart,
-                caption: `📊 Allocation chart for ${fund.fund_name}`,
-                reply_markup: JSON.stringify({
+
+async function handleViewChart(agent, fund) {
+    try {
+        const fundName = fund.fund_name;
+        const botToken = process.env.BOT_TOKEN;
+        const chartData = {
+            type: 'pie',
+            data: {
+                labels: ['Debt', 'Large Cap Equity', 'Mid Cap Equity', 'Small Cap Equity'],
+                datasets: [{
+                    data: [
+                        parseInt(fund.details.allocation.debt || 30),
+                        parseInt(fund.details.allocation.large_cap || 50),
+                        parseInt(fund.details.allocation.mid_cap || 22),
+                        parseInt(fund.details.allocation.small_cap || 25)
+                    ],
+                    backgroundColor: ['#f0ad4e', '#5bc0de', '#5cb85c', '#d9534f']
+                }]
+            },
+            options: {
+                plugins: {
+                    title: {
+                        display: true,
+                        text: `${fundName} Allocation`,
+                        font: { size: 18 }
+                    },
+                    legend: {
+                        display: true,
+                        position: 'bottom'
+                    }
+                },
+                layout: {
+                    padding: 20
+                }
+            }
+        };
+        const chartUrl = `https://quickchart.io/chart?c=${encodeURIComponent(JSON.stringify(chartData))}&backgroundColor=white&width=500&height=500`;
+        const telegramPayload = agent.originalRequest.payload;
+        let chatId;
+        if (telegramPayload.data.callback_query) {
+            chatId = telegramPayload.data.callback_query.message.chat.id;
+            const callbackQueryId = telegramPayload.data.callback_query.id;
+            await axios.post(`https://api.telegram.org/bot${botToken}/answerCallbackQuery`, {
+                callback_query_id: callbackQueryId
+            });
+        } else if (telegramPayload.data.message) {
+            chatId = telegramPayload.data.message.chat.id;
+        } else {
+            agent.add('Sorry, I could not display the chart right now.');
+            return;
+        }
+
+        // Ensure we have a chat ID
+        if (!chatId) {
+            agent.add('Sorry, I could not display the chart right now.');
+            return;
+        }
+        await axios.get(chartUrl);
+        const response = await axios.post(
+            `https://api.telegram.org/bot${botToken}/sendPhoto`,
+            {
+                chat_id: chatId,
+                photo: chartUrl,
+                caption: `📊 Allocation chart for ${fundName}`,
+                reply_markup: {
                     inline_keyboard: [
                         [{ text: "Invest Now", callback_data: "Invest Now" }],
                         [{ text: "Main Menu", callback_data: "Main Menu" }]
                     ]
-                })
+                }
             }
+        );
+        agent.add('');
+
+    } catch (error) {
+        console.error('Error sending chart:', error);
+
+        if (error.response && error.response.data) {
+            console.error('Telegram API error details:', error.response.data);
         }
-    };
-
-    // Add debugging
-    console.log('Attempting to send Telegram photo with payload:', JSON.stringify(telegramPayload));
-
-    // Send using Payload
-    agent.add(new Payload(agent.TELEGRAM, telegramPayload));
-
-    // Add a fallback text response just in case
-    agent.add(`Here's the allocation chart for ${fund.fund_name}`);
+        const fundName = fund?.fund_name || "the fund";
+        agent.add(`Sorry, I couldn't display the chart for ${fundName} right now.`);
+    }
 }
 
 function getCurrentFinancialYear() {
     const now = new Date();
     const currentYear = now.getFullYear();
-    const currentMonth = now.getMonth(); // 0-indexed (0 = Jan)
+    const currentMonth = now.getMonth();
 
     let startDate, endDate;
 
-    if (currentMonth < 3) { // Before April
-        startDate = new Date(currentYear - 1, 3, 1); // April 1 last year
-        endDate = new Date(currentYear, 2, 31);      // March 31 this year
+    if (currentMonth < 3) {
+        startDate = new Date(currentYear - 1, 3, 1);
+        endDate = new Date(currentYear, 2, 31);
     } else {
-        startDate = new Date(currentYear, 3, 1);     // April 1 this year
-        endDate = new Date(currentYear + 1, 2, 31);  // March 31 next year
+        startDate = new Date(currentYear, 3, 1);
+        endDate = new Date(currentYear + 1, 2, 31);
     }
-
     return { startDate, endDate };
 }
 
@@ -170,7 +226,6 @@ function getPreviousFinancialYear() {
 
     const prevFYEnd = new Date(currentFYStart);
     prevFYEnd.setDate(prevFYEnd.getDate() - 1);
-
     return { startDate: prevFYStart, endDate: prevFYEnd };
 }
 

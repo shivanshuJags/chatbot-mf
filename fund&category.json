@@ -8,10 +8,10 @@
         "chart": "https://n6274q7s-3000.inc1.devtunnels.ms/charts/alpha_growth_fund_chart.png",
         "details": {
           "allocation": {
-            "Debt": "30%",
-            "Large Cap Equity": "30%",
-            "Mid Cap Equity": "20%",
-            "Small Cap Equity": "20%"
+            "debt": "30%",
+            "large_cap": "30%",
+            "mid_cap": "20%",
+            "small_cap": "20%"
           },
           "cagr": "15%",
           "link": "https://dummy-link.com/alpha"
@@ -23,10 +23,10 @@
         "chart": "https://n6274q7s-3000.inc1.devtunnels.ms/charts/alpha_growth_fund_chart.png",
         "details": {
           "allocation": {
-            "Debt": "30%",
-            "Large Cap Equity": "50%",
-            "Mid Cap Equity": "22%",
-            "Small Cap Equity": "25%"
+            "debt": "30%",
+            "large_cap": "40%",
+            "mid_cap": "10%",
+            "small_cap": "30%"
           },
           "cagr": "30%",
           "link": "https://dummy-link.com/delta"
@@ -38,10 +38,10 @@
         "chart": "https://n6274q7s-3000.inc1.devtunnels.ms/charts/alpha_growth_fund_chart.png",
         "details": {
           "allocation": {
-            "Debt": "10%",
-            "Large Cap Equity": "50%",
-            "Mid Cap Equity": "30%",
-            "Small Cap Equity": "10%"
+            "debt": "10%",
+            "large_cap": "50%",
+            "mid_cap": "30%",
+            "small_cap": "10%"
           },
           "cagr": "18%",
           "link": "https://dummy-link.com/zenith"
@@ -53,10 +53,10 @@
         "chart": "https://n6274q7s-3000.inc1.devtunnels.ms/charts/alpha_growth_fund_chart.png",
         "details": {
           "allocation": {
-            "Debt": "0%",
-            "Large Cap Equity": "60%",
-            "Mid Cap Equity": "25%",
-            "Small Cap Equity": "15%"
+            "debt": "0%",
+            "large_cap": "60%",
+            "mid_cap": "25%",
+            "small_cap": "15%"
           },
           "cagr": "20%",
           "link": "https://dummy-link.com/axis"
@@ -73,10 +73,10 @@
         "chart": "https://n6274q7s-3000.inc1.devtunnels.ms/charts/alpha_growth_fund_chart.png",
         "details": {
           "allocation": {
-            "Debt": "80%",
-            "Large Cap Equity": "10%",
-            "Mid Cap Equity": "5%",
-            "Small Cap Equity": "5%"
+            "debt": "80%",
+            "large_cap": "10%",
+            "mid_cap": "5%",
+            "small_cap": "5%"
           },
           "cagr": "8%",
           "link": "https://dummy-link.com/beta"
@@ -88,10 +88,10 @@
         "chart": "https://n6274q7s-3000.inc1.devtunnels.ms/charts/alpha_growth_fund_chart.png",
         "details": {
           "allocation": {
-            "Debt": "90%",
-            "Large Cap Equity": "5%",
-            "Mid Cap Equity": "3%",
-            "Small Cap Equity": "2%"
+            "debt": "90%",
+            "large_cap": "5%",
+            "mid_cap": "3%",
+            "small_cap": "2%"
           },
           "cagr": "7%",
           "link": "https://dummy-link.com/omega"
@@ -103,10 +103,10 @@
         "chart": "https://n6274q7s-3000.inc1.devtunnels.ms/charts/alpha_growth_fund_chart.png",
         "details": {
           "allocation": {
-            "Debt": "95%",
-            "Large Cap Equity": "3%",
-            "Mid Cap Equity": "1%",
-            "Small Cap Equity": "1%"
+            "debt": "95%",
+            "large_cap": "3%",
+            "mid_cap": "1%",
+            "small_cap": "1%"
           },
           "cagr": "6.5%",
           "link": "https://dummy-link.com/securebond"
@@ -123,10 +123,10 @@
         "chart": "https://n6274q7s-3000.inc1.devtunnels.ms/charts/alpha_growth_fund_chart.png",
         "details": {
           "allocation": {
-            "Debt": "40%",
-            "Large Cap Equity": "35%",
-            "Mid Cap Equity": "15%",
-            "Small Cap Equity": "10%"
+            "debt": "40%",
+            "large_cap": "35%",
+            "mid_cap": "15%",
+            "small_cap": "10%"
           },
           "cagr": "10%",
           "link": "https://dummy-link.com/gamma"
@@ -138,10 +138,10 @@
         "chart": "https://n6274q7s-3000.inc1.devtunnels.ms/charts/alpha_growth_fund_chart.png",
         "details": {
           "allocation": {
-            "Debt": "35%",
-            "Large Cap Equity": "40%",
-            "Mid Cap Equity": "15%",
-            "Small Cap Equity": "10%"
+            "debt": "35%",
+            "large_cap": "40%",
+            "mid_cap": "15%",
+            "small_cap": "10%"
           },
           "cagr": "12%",
           "link": "https://dummy-link.com/blended"
