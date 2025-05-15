@@ -6,6 +6,7 @@ const CONSTANTS = require('./constant');
 const greetingData = require('./greeting.json');
 const fundData = require('./fund&category.json');
 const { showQuickOptions, showPortfolioOptions, buildTransactionTable, handleTransactionHistory, getCurrentFinancialYear, getPreviousFinancialYear, handleExcelDownload, replaceDynamicText, buildFundDisplay, handleViewChart, getPortfolioData } = require('./common');
+require('dotenv').config();
 
 const intentFunctions = {
     welcomeIntentFn: function (agent) {
@@ -364,7 +365,7 @@ const intentFunctions = {
 
         const filePath = await generateTransactionExcel(phone, userData.transactions);
 
-        const downloadUrl = `https://n6274q7s-3000.inc1.devtunnels.ms/downloads/${path.basename(filePath)}`;
+        const downloadUrl = `${process.env.BASE_URL}/downloads/${path.basename(filePath)}`;
         handleExcelDownload(agent, downloadUrl);
     },
     viewChartIntentFn: async function (agent) {
